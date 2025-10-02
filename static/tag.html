@@ -317,7 +317,7 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
     <th>Teams</th>
     <th>Events</th>
     <th>Date</th>
-    <th>Actions</th> <!-- 👈 اضف العمود ده -->
+    <th>Actions</th> 
   </tr>
 </thead>
 
@@ -615,7 +615,6 @@ const dribbleOutcome = document.getElementById('dribbleOutcome');
     for(const ev of events){
       const sx = ev.X/120*pitch.width, sy=ev.Y/80*pitch.height;
 
-      // لو عندنا X2/Y2 → ارسم سهم. لو فاضيين (Shot) → ارسم نقطة واحدة
       if(ev.X2 !== '' && ev.Y2 !== '' && ev.X2 != null && ev.Y2 != null){
         const ex = ev.X2/120*pitch.width, ey=ev.Y2/80*pitch.height;
         drawArrow(sx,sy,ex,ey);
@@ -665,7 +664,6 @@ const dribbleOutcome = document.getElementById('dribbleOutcome');
 }
 
 
-      // هنا يتم بناء كائن الحدث في row
       const row = { Team: teamName, Player: player, Event: evType, Outcome: outcome, Mins: mins, Secs: secs, X, Y, X2: '', Y2: '' };
       events.push(row);
       appendRow(row);
@@ -775,12 +773,11 @@ redrawAll();
   btnExport.onclick = async () => {
   if(events.length===0){ alert('No events'); return; }
 
-  // اطلب من اليوزر اسم الماتش
-  const matchName = prompt("اكتب اسم الماتش:", "Match 1");
-  if(!matchName) return; // لو ضغط Cancel
+  const matchName = prompt("write match name:", "Match 1");
+  if(!matchName) return;
 
   const payload = {
-    matchName: matchName,  // ← نبعته للسيرفر
+    matchName: matchName,  
     team1: team1Name.value.trim() || 'Team 1',
     team2: team2Name.value.trim() || 'Team 2',
     events: events
@@ -797,7 +794,6 @@ redrawAll();
     const data = await res.json();
     alert('Match saved: ' + matchName);
 
-    // اعرضه فورًا في الجدول تحت
     renderSavedMatches();
   } catch (err) {
     console.error(err);
@@ -882,7 +878,7 @@ async function loadMatch(matchId){
 
 // call once page loads
 window.addEventListener('load', () => {
-  // existing onload code runs already — فقط نطلب قائمة الماتشات
+  // existing onload code runs already 
   renderSavedMatches();
 });
 
