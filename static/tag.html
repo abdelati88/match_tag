@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Local Match Tagger (Flexible)</title>
+<style>
+  :root { --bg:#111827; --panel:#1f2937; --soft:#374151; --accent:#8b5cf6; --text:#e5e7eb; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+.wrap{max-width:97%;margin:20px auto;padding:0 16px}
+.grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:16px}  .card{background:var(--panel);border:1px solid var(--soft);border-radius:12px;padding:12px}
+h1{font-size:13px;margin:0 0 4px}
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.header-container h1 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.github-star, #btnResetSoft {
+  font-size: 14px;
+  padding: 5px 12px;
+}
+
+  h2{font-size:16px;margin:8px 0}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  button,.select,.input,textarea{background:var(--soft);border:1px solid #4b5563;color:var(--text);padding:8px 10px;border-radius:10px}
+  button{cursor:pointer} button:hover{filter:brightness(1.1)}
+  .pill{padding:6px 10px;border-radius:999px;background:#303846;border:1px solid #3b4556}
+.video{width:100%;height:400px;background:#000;border-radius:12px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .table{height:220px;overflow:auto;border:1px solid #4b5563;border-radius:8px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:6px 8px;border-bottom:1px solid #374151;text-align:center;white-space:nowrap}
+  th{position:sticky;top:0;background:#273244;z-index:1}
+canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;background:#1a472a}
+  .legend{display:flex;gap:8px;align-items:center;font-size:12px;opacity:.9}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .muted{opacity:.8}
+  .grow{flex:1}
+  .evtBtn{position:relative}
+  .evtBtn .x {
+    position: absolute;
+    right: -4px;
+    top: -4px;
+    width: 14px;
+    height: 14px;
+    line-height: 12px;
+    border-radius: 50%;
+    background: #444;
+    border: none;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    text-align: center;
+  }
+  .evtBtn .x:hover { background: #ef4444; }
+
+  textarea{width:100%;height:120px;border-radius:10px;resize:vertical;font-family:monospace}
+
+  .roster{
+    height: 220px;
+    overflow: auto;
+    white-space: pre;
+    line-height: 28px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.06) 0px,
+      rgba(255,255,255,0.06) 1px,
+      transparent 1px,
+      transparent 28px
+    );
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    resize: vertical;
+  }
+
+  @media (max-width: 900px){
+    .grid{ grid-template-columns:1fr; }
+  }
+
+    /* Ad spaces */
+  .ad-container{
+    background:#1a2332;
+    border:1px solid #374151;
+    border-radius:8px;
+    padding:12px;
+    text-align:center;
+    margin:12px 0;
+  }
+  .ad-placeholder{
+    background:#0f172a;
+    border:1px dashed #4b5563;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#6b7280;
+    font-size:14px;
+    border-radius:6px;
+  }
+  .ad-top{height:90px}
+  .ad-bottom{height:90px}
+  .ad-sidebar{
+    position:sticky;
+    top:20px;
+    height:250px;
+    margin-left:16px;
+  }
+  
+  /* GitHub star button */
+  .github-star{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:#238636;
+    color:#fff;
+    padding:6px 12px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:14px;
+    border:1px solid #2ea043;
+    transition:background 0.2s;
+  }
+  .github-star:hover{
+    background:#2ea043;
+  }
+  .github-star svg{
+    width:16px;
+    height:16px;
+    fill:currentColor;
+  }
+  
+  /* Updated grid to include sidebar */
+  .main-layout{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header-container" style="margin-bottom: 8px;">
+  <h1>Local Match Tagger </h1>
+  <div class="header-buttons">
+    <a href="https://github.com/YOUR_USERNAME/YOUR_REPO" target="_blank" class="github-star">
+      <svg viewBox="0 0 16 16" style="width:16px;height:16px;vertical-align:middle;"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
+      Star
+    </a>
+    <button id="btnResetSoft">Reset</button>
+  </div>
+</div>
+
+    <!-- Top Ad Space -->
+  <div class="ad-container">
+    <div class="ad-placeholder ad-top">
+      Google AdSense Ad (728x90) - Replace this div with your AdSense code
+    </div>
+  </div>
+
+
+   <div class="main-layout">
+    <div>
+      <div class="grid">
+
+    <!-- LEFT: video + controls -->
+    <div class="card">
+      <h2>🎞️ Local Video</h2>
+      <div class="row">
+        <input id="fileInput" type="file" accept="video/*" class="input">
+        <span class="muted"> upload video from device</span>
+      </div>
+      <video id="vid" class="video" controls></video>
+
+      <div class="row" style="margin-top:10px">
+        <span class="pill">Time: <span id="timeLabel">0:00</span></span>
+        <input id="timeSlider" type="range" min="0" max="100" value="0" class="grow">
+        <button id="btnBack5">⏪ -5s</button>
+        <button id="btnFwd5">⏩ +5s</button>
+        <button id="btnFrameBack">◀ Frame</button>
+        <button id="btnFrameFwd">Frame ▶</button>
+      </div>
+
+      <div class="cols" style="margin-top:12px">
+        <!-- Teams / Rosters -->
+        <div class="card">
+          <h2>Teams & Rosters</h2>
+          <div class="row">
+            <label>Team 1 name</label>
+            <input id="team1Name" class="input" placeholder="e.g. Barcelona" style="width:180px">
+            <label>Team 2 name</label>
+            <input id="team2Name" class="input" placeholder="e.g. Real Madrid" style="width:180px">
+            <button id="saveTeams">Save</button>
+          </div>
+          <div class="cols" style="margin-top:8px">
+            <div>
+              <div class="row" style="margin-bottom:6px"><b id="t1Label">Team 1 Roster</b></div>
+              <textarea id="t1Roster" class="input roster" wrap="off" spellcheck="false"></textarea>
+            </div>
+            <div>
+              <div class="row" style="margin-bottom:6px"><b id="t2Label">Team 2 Roster</b></div>
+              <textarea id="t2Roster" class="input roster" wrap="off" spellcheck="false"></textarea>
+            </div>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <button id="applyRosters">Apply Rosters</button>
+          </div>
+        </div>
+
+        <!-- Selection -->
+        <div class="card">
+          <h2>Selection</h2>
+          <div class="row">
+            <label>Team</label>
+            <select id="team" class="select" style="min-width:140px"></select>
+
+            <span style="flex-basis:100%; height:0;"></span>
+
+            <label>Player</label>
+            <select id="playerSel" class="select" style="min-width:140px"></select>
+            <input id="playerFree" class="input" placeholder="or write it manually" style="width:170px">  <!-- لو مفيش الأصل موجود -->
+
+            <div class="row" id="passOutcomeWrap" style="margin-top:8px; display:none">
+              <label>Pass outcome</label>
+              <select id="passOutcome" class="select" style="min-width:180px">
+                <option value="Successful">Successful</option>
+                <option value="Unsuccessful">Unsuccessful</option>
+              </select>
+            </div>
+
+
+          </div>
+<div class="row" id="shotOutcomeWrap" style="margin-top:8px; display:none">
+  <label>Shot outcome</label>
+  <select id="shotOutcome" class="select" style="min-width:180px">
+    <option value="Goal">Goal</option>
+    <option value="Saved">Saved</option>
+    <option value="Off Target">Off Target</option>
+    <option value="Blocked">Blocked</option>
+  </select>
+</div>
+
+<div class="row" id="dribbleOutcomeWrap" style="margin-top:8px; display:none">
+  <label>Dribble outcome</label>
+  <select id="dribbleOutcome" class="select" style="min-width:180px;">
+    <option value="">Select</option>
+    <option value="Successful">Successful</option>
+    <option value="Failed">Failed</option>
+  </select>
+</div>
+
+
+          <h2 style="margin-top:10px">Event Types</h2>
+          <div id="evtBar" class="row" style="gap:10px;flex-wrap:wrap"></div>
+          <div class="row" style="margin-top:6px">
+            <input id="newEvt" class="input" placeholder="Add new event type (e.g., Key Pass)" style="width:220px">
+            <button id="addEvt">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: pitch + table -->
+    <div class="card">
+      <h2>Pitch (120 × 80)</h2>
+      <canvas id="pitch" width="1200" height="800"></canvas>
+
+      <h2 style="margin-top:10px">Events</h2>
+      <div class="row" style="margin-bottom:6px">
+        <button id="btnExport">Export CSV</button>
+        <button id="btnDelete">Delete last</button>
+        <button id="btnClear">Clear all</button>
+
+        <span class="grow"></span>
+        <div class="legend">
+          <div class="dot" style="background:#e5e7eb"></div> start
+          <div class="dot" style="background:#ef4444"></div> end
+          <div class="dot" style="background:#22d3ee"></div> path
+        </div>
+      </div>
+      <div class="table">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>#</th><th>Team</th><th>Player</th><th>Event</th><th>Outcome</th>
+              <th>Mins</th><th>Secs</th><th>X</th><th>Y</th><th>X2</th><th>Y2</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+        <!-- Saved Matches -->
+  <h2 style="margin-top:10px">Saved Matches</h2>
+  <div class="table" style="height:150px; overflow:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+      <thead>
+  <tr>
+    <th>#</th>
+    <th>Match</th>
+    <th>Teams</th>
+    <th>Events</th>
+    <th>Date</th>
+    <th>Actions</th> <!-- 👈 اضف العمود ده -->
+  </tr>
+</thead>
+
+      <tbody id="savedMatchesBody"></tbody>
+    </table>
+  </div>
+
+    </div>
+  </div>
+</div>
+
+      </div> <!-- end of grid -->
+    </div> <!-- end of main content -->
+    
+   
+
+
+<script>
+
+  function updatePassOutcomeVisibility(){
+  const isPass = (currentEventType || '').toLowerCase() === 'pass';
+  document.getElementById('passOutcomeWrap').style.display = isPass ? 'flex' : 'none';
+}
+function updateDribbleOutcomeVisibility() {
+  const isDribble = currentEventType && currentEventType.toLowerCase() === "dribble";
+  document.getElementById('dribbleOutcomeWrap').style.display = isDribble ? 'flex' : 'none';
+}
+
+
+  // ======= Helpers: storage =======
+
+
+  const LS_KEY = 'local_tagger_v2';
+  function saveState(partial){
+    const cur = JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    localStorage.setItem(LS_KEY, JSON.stringify({...cur, ...partial}));
+  }
+  function loadState(){
+    return JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+  }
+
+  // ======= Elements =======
+  const fileInput = document.getElementById('fileInput');
+  const vid = document.getElementById('vid');
+  const timeLabel = document.getElementById('timeLabel');
+  const timeSlider = document.getElementById('timeSlider');
+  const btnBack5 = document.getElementById('btnBack5');
+  const btnFwd5 = document.getElementById('btnFwd5');
+  const btnFrameBack = document.getElementById('btnFrameBack');
+  const btnFrameFwd = document.getElementById('btnFrameFwd');
+
+  const teamSel = document.getElementById('team');
+  const playerSel = document.getElementById('playerSel');
+  const playerFree = document.getElementById('playerFree');
+
+  const team1Name = document.getElementById('team1Name');
+  const team2Name = document.getElementById('team2Name');
+  const saveTeams  = document.getElementById('saveTeams');
+  const t1RosterTA = document.getElementById('t1Roster');
+  const t2RosterTA = document.getElementById('t2Roster');
+  const t1Label = document.getElementById('t1Label');
+  const t2Label = document.getElementById('t2Label');
+  const applyRosters = document.getElementById('applyRosters');
+
+  const evtBar = document.getElementById('evtBar');
+  const newEvt = document.getElementById('newEvt');
+  const addEvt = document.getElementById('addEvt');
+
+  const tblBody = document.querySelector('#tbl tbody');
+  const btnExport = document.getElementById('btnExport');
+  const btnDelete = document.getElementById('btnDelete');
+  const btnClear = document.getElementById('btnClear');
+
+  const pitch = document.getElementById('pitch');
+  const ctx = pitch.getContext('2d');
+
+  const btnResetSoft = document.getElementById('btnResetSoft');
+
+  const shotOutcomeWrap = document.getElementById('shotOutcomeWrap');
+  const shotOutcome = document.getElementById('shotOutcome');
+
+  const dribbleOutcomeWrap = document.getElementById('dribbleOutcomeWrap');
+const dribbleOutcome = document.getElementById('dribbleOutcome');
+
+
+  // ======= State =======
+  let events = [];
+  let currentEventType = null;
+  let tempStart = null;   
+  const FPS = 25;
+
+  // ======= Defaults =======
+  function defaultRoster(prefix){
+    return Array.from({length:15}, (_,i)=>`${prefix}${i+1}`).join('\n');
+  }
+  const defaultState = {
+    team1Name:'Home',
+    team2Name:'Away',
+    t1Roster: defaultRoster('H'),
+    t2Roster: defaultRoster('A'),
+    eventTypes: ['Shot','Shot Assist','Pass','Cross','Dribble']
+  };
+
+
+  // ======= Init from storage =======
+  const boot = {...defaultState, ...loadState()};
+
+  // Populate team names / labels / textareas
+  team1Name.value = boot.team1Name;
+  team2Name.value = boot.team2Name;
+  t1Label.textContent = `${boot.team1Name} Roster`;
+  t2Label.textContent = `${boot.team2Name} Roster`;
+  t1RosterTA.value = boot.t1Roster;
+  t2RosterTA.value = boot.t2Roster;
+
+  function populateTeamSelect(){
+    teamSel.innerHTML = '';
+    [boot.team1Name, boot.team2Name].forEach((nm,idx)=>{
+      const opt = document.createElement('option');
+      opt.value = idx===0 ? 'T1' : 'T2';
+      opt.textContent = nm;
+      teamSel.appendChild(opt);
+    });
+  }
+  function getRoster(which){
+    const txt = which==='T1' ? t1RosterTA.value : t2RosterTA.value;
+    return txt.split('\n').map(s=>s.trim()).filter(Boolean);
+  }
+  function populatePlayerSelect(){
+    const which = teamSel.value || 'T1';
+    playerSel.innerHTML = '';
+    getRoster(which).forEach(p=>{
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      playerSel.appendChild(o);
+    });
+  }
+
+  populateTeamSelect();
+  populatePlayerSelect();
+
+  // ======= Show/Hide shot outcome based on event type =======
+  function updateShotOutcomeVisibility() {
+  const isShot = currentEventType && currentEventType.toLowerCase() === "shot";
+  const isDribble = currentEventType && currentEventType.toLowerCase() === "dribble";
+  shotOutcomeWrap.style.display = isShot ? "flex" : "none";
+  dribbleOutcomeWrap.style.display = isDribble ? "flex" : "none";
+}
+
+
+  saveTeams.onclick = ()=>{
+    const t1 = team1Name.value.trim() || 'Team 1';
+    const t2 = team2Name.value.trim() || 'Team 2';
+    boot.team1Name = t1; boot.team2Name = t2;
+    t1Label.textContent = `${t1} Roster`;
+    t2Label.textContent = `${t2} Roster`;
+    populateTeamSelect();
+    saveState({team1Name:t1, team2Name:t2});
+  };
+
+  applyRosters.onclick = ()=>{
+    boot.t1Roster = t1RosterTA.value;
+    boot.t2Roster = t2RosterTA.value;
+    populatePlayerSelect();
+    saveState({t1Roster:boot.t1Roster, t2Roster:boot.t2Roster});
+  };
+
+    // Prevent Enter key from adding new lines beyond 15 players
+  t1RosterTA.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const lines = t1RosterTA.value.split('\n');
+      if (lines.length >= 15) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  t2RosterTA.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const lines = t2RosterTA.value.split('\n');
+      if (lines.length >= 15) {
+        e.preventDefault();
+      }
+    }
+  });
+
+
+  teamSel.addEventListener('change', populatePlayerSelect);
+
+  // ======= Event types UI =======
+  function renderEvtBar(){
+    evtBar.innerHTML='';
+    (boot.eventTypes||[]).forEach((nm,idx)=>{
+      const wrap = document.createElement('div');
+      wrap.className='evtBtn';
+      const btn = document.createElement('button');
+      btn.textContent = nm;
+      btn.onclick = () => {
+  currentEventType = nm;
+  [...evtBar.querySelectorAll('button')].forEach(b => b.style.outline = 'none');
+  btn.style.outline = '2px solid var(--accent)';
+  
+  updateShotOutcomeVisibility();
+  updatePassOutcomeVisibility();
+   updateDribbleOutcomeVisibility()
+};
+
+      const del = document.createElement('button');
+      del.className='x';
+      del.textContent='×';
+      del.title='Delete event type';
+      del.onclick = (e)=>{
+        e.stopPropagation();
+        boot.eventTypes.splice(idx,1);
+        saveState({eventTypes: boot.eventTypes});
+        if(currentEventType===nm) currentEventType = null;
+        renderEvtBar();
+      };
+      wrap.appendChild(btn);
+      wrap.appendChild(del);
+      evtBar.appendChild(wrap);
+    });
+    // select first if none
+    if(!currentEventType && boot.eventTypes.length){
+      currentEventType = boot.eventTypes[0];
+      const firstBtn = evtBar.querySelector('button');
+      if(firstBtn) firstBtn.style.outline='2px solid var(--accent)';
+    }
+    updateShotOutcomeVisibility(); 
+  }
+  renderEvtBar();
+
+  addEvt.onclick = ()=>{
+    const nm = newEvt.value.trim();
+    if(!nm) return;
+    if(!boot.eventTypes.includes(nm)){
+      boot.eventTypes.push(nm);
+      saveState({eventTypes: boot.eventTypes});
+      newEvt.value='';
+      renderEvtBar();
+    }
+  };
+
+  // ======= Video handling =======
+  fileInput.addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const url = URL.createObjectURL(file);
+    vid.src = url;
+    vid.play().catch(()=>{});
+  });
+  function fmt(t){ const m=Math.floor(t/60), s=Math.floor(t%60); return `${m}:${s.toString().padStart(2,'0')}`; }
+  function updateTimeUI(){
+    timeLabel.textContent = fmt(vid.currentTime || 0);
+    if(vid.duration){ timeSlider.value = Math.floor((vid.currentTime/vid.duration)*100); }
+  }
+  vid.addEventListener('timeupdate', updateTimeUI);
+  vid.addEventListener('loadedmetadata', updateTimeUI);
+  timeSlider.addEventListener('input', ()=>{
+    if(!vid.duration) return;
+    vid.currentTime = (timeSlider.value/100)*vid.duration;
+  });
+  btnBack5.onclick = ()=> vid.currentTime = Math.max(vid.currentTime - 5, 0);
+  btnFwd5.onclick  = ()=> vid.currentTime = Math.min(vid.currentTime + 5, (vid.duration||0));
+  btnFrameBack.onclick = ()=> vid.currentTime = Math.max(vid.currentTime - (1/FPS), 0);
+  btnFrameFwd.onclick  = ()=> vid.currentTime = Math.min(vid.currentTime + (1/FPS), (vid.duration||0));
+
+  // ======= Pitch drawing =======
+  function drawPitch(){
+    ctx.fillStyle = '#1a472a'; ctx.fillRect(0,0,pitch.width,pitch.height);
+    for(let i=0;i<10;i++){ ctx.fillStyle = i%2===0?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.03)'; ctx.fillRect(i*(pitch.width/10),0,pitch.width/10,pitch.height); }
+    ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 4;
+    ctx.strokeRect(20,20,pitch.width-40,pitch.height-40);
+    ctx.beginPath(); ctx.moveTo(pitch.width/2,20); ctx.lineTo(pitch.width/2,pitch.height-20); ctx.stroke();
+    ctx.beginPath(); ctx.arc(pitch.width/2, pitch.height/2, 90, 0, Math.PI*2); ctx.stroke();
+    const boxW=180, boxH=360, areaW=60, areaH=200;
+    ctx.strokeRect(20,(pitch.height-boxH)/2,boxW,boxH);
+    ctx.strokeRect(20,(pitch.height-areaH)/2,areaW,areaH);
+    ctx.strokeRect(pitch.width-20-boxW,(pitch.height-boxH)/2,boxW,boxH);
+    ctx.strokeRect(pitch.width-20-areaW,(pitch.height-areaH)/2,areaW,areaH);
+  }
+  function drawArrow(x1,y1,x2,y2){
+    ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    const ang = Math.atan2(y2-y1, x2-x1), head=14;
+    ctx.beginPath(); ctx.moveTo(x2,y2);
+    ctx.lineTo(x2 - head*Math.cos(ang - Math.PI/6), y2 - head*Math.sin(ang - Math.PI/6));
+    ctx.lineTo(x2 - head*Math.cos(ang + Math.PI/6), y2 - head*Math.sin(ang + Math.PI/6));
+    ctx.closePath(); ctx.fillStyle = '#22d3ee'; ctx.fill();
+    ctx.fillStyle='#e5e7eb'; ctx.beginPath(); ctx.arc(x1,y1,6,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ef4444'; ctx.beginPath(); ctx.arc(x2,y2,6,0,Math.PI*2); ctx.fill();
+  }
+  function redrawAll(){
+    drawPitch();
+    for(const ev of events){
+      const sx = ev.X/120*pitch.width, sy=ev.Y/80*pitch.height;
+
+      // لو عندنا X2/Y2 → ارسم سهم. لو فاضيين (Shot) → ارسم نقطة واحدة
+      if(ev.X2 !== '' && ev.Y2 !== '' && ev.X2 != null && ev.Y2 != null){
+        const ex = ev.X2/120*pitch.width, ey=ev.Y2/80*pitch.height;
+        drawArrow(sx,sy,ex,ey);
+      } else {
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(sx,sy,6,0,Math.PI*2); ctx.fill();
+      }
+    }
+    if(tempStart){
+      ctx.fillStyle='#e5e7eb'; ctx.beginPath(); ctx.arc(tempStart.x,tempStart.y,6,0,Math.PI*2); ctx.fill();
+    }
+  }
+  redrawAll();
+  window.addEventListener('resize', redrawAll);
+
+  // ======= Add events by clicking the pitch =======
+  window.addEventListener('load', () => {
+  const pitch = document.getElementById('pitch');
+
+  pitch.addEventListener('click', (e) => {
+    const rect = pitch.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (pitch.width / rect.width);
+    const y = (e.clientY - rect.top)  * (pitch.height / rect.height);
+
+    const evType = currentEventType || (boot.eventTypes[0]||'Event');
+
+    if ((evType || '').toLowerCase() === 'shot') {
+      const X  = +(x / pitch.width  * 120).toFixed(1);
+      const Y  = +(y / pitch.height * 80 ).toFixed(1);
+
+      const t = Math.max(0, vid.currentTime||0);
+      const mins = Math.floor(t/60), secs=Math.floor(t%60);
+
+      const whichTeam = teamSel.value;
+      const teamName  = whichTeam==='T1' ? team1Name.value.trim()||'Team 1' : team2Name.value.trim()||'Team 2';
+
+      let player = playerFree.value.trim();
+      if(!player) player = playerSel.value || '';
+
+      let outcome = '';
+      if ((evType || '').toLowerCase() === 'shot') {
+  outcome = shotOutcome ? (shotOutcome.value || '') : '';
+} else if ((evType || '').toLowerCase() === 'pass') {
+  outcome = passOutcome ? (passOutcome.value || '') : '';
+} else if ((evType || '').toLowerCase() === 'dribble') {
+  outcome = dribbleOutcome ? (dribbleOutcome.value || '') : '';
+}
+
+
+      // هنا يتم بناء كائن الحدث في row
+      const row = { Team: teamName, Player: player, Event: evType, Outcome: outcome, Mins: mins, Secs: secs, X, Y, X2: '', Y2: '' };
+      events.push(row);
+      appendRow(row);
+
+      tempStart = null;
+      redrawAll();
+      return;
+    }
+
+    if(!tempStart){ tempStart = {x,y}; redrawAll(); return; }
+
+    const start = tempStart; tempStart = null;
+    const X  = +(start.x / pitch.width  * 120).toFixed(1);
+    const Y  = +(start.y / pitch.height * 80 ).toFixed(1);
+    const X2 = +(x       / pitch.width  * 120).toFixed(1);
+    const Y2 = +(y       / pitch.height * 80).toFixed(1);
+
+    const t = Math.max(0, vid.currentTime||0);
+    const mins = Math.floor(t/60), secs=Math.floor(t%60);
+
+    const whichTeam = teamSel.value;
+    const teamName  = whichTeam==='T1' ? team1Name.value.trim()||'Team 1' : team2Name.value.trim()||'Team 2';
+
+    let player = playerFree.value.trim();
+    if(!player) player = playerSel.value || '';
+
+    let outcome = '';
+if ((evType || '').toLowerCase() === 'shot') {
+  outcome = shotOutcome ? (shotOutcome.value || '') : '';
+} else if ((evType || '').toLowerCase() === 'pass') {
+  outcome = passOutcome ? (passOutcome.value || '') : '';
+} else if ((evType || '').toLowerCase() === 'dribble') {
+  outcome = dribbleOutcome ? (dribbleOutcome.value || '') : '';
+}
+
+const row = { Team: teamName, Player: player, Event: evType, Outcome: outcome, Mins: mins, Secs: secs, X, Y, X2, Y2 };
+
+
+events.push(row);
+appendRow(row);
+redrawAll();
+
+  });
+});
+
+  function appendRow(r){
+  const tr = document.createElement('tr');
+  const idx = events.length;
+  tr.innerHTML = `
+    <td>${idx}</td>
+    <td>${r.Team}</td>
+    <td>${r.Player}</td>
+    <td>${r.Event}</td>
+    <td>${r.Outcome || ''}</td>
+    <td>${r.Mins}</td>
+    <td>${r.Secs}</td>
+    <td>${r.X}</td>
+    <td>${r.Y}</td>
+    <td>${r.X2 ?? ''}</td>
+    <td>${r.Y2 ?? ''}</td>
+  `;
+  tblBody.appendChild(tr);
+}
+
+  function rebuildTable(){ tblBody.innerHTML=''; events.forEach(appendRow); }
+
+  btnDelete.onclick = ()=>{ events.pop(); rebuildTable(); redrawAll(); };
+  btnClear.onclick = ()=>{ if(confirm('Clear all events?')){ events=[]; rebuildTable(); redrawAll(); } };
+
+  // ======= Reset (Soft) =======
+  btnResetSoft.onclick = () => {
+    localStorage.removeItem(LS_KEY);
+    Object.assign(boot, JSON.parse(JSON.stringify(defaultState)));
+    events = [];
+    rebuildTable();
+
+    team1Name.value = boot.team1Name;
+    team2Name.value = boot.team2Name;
+    t1Label.textContent = `${boot.team1Name} Roster`;
+    t2Label.textContent = `${boot.team2Name} Roster`;
+    t1RosterTA.value = boot.t1Roster;
+    t2RosterTA.value = boot.t2Roster;
+
+    populateTeamSelect();
+    teamSel.value = 'T1';
+    populatePlayerSelect();
+
+    currentEventType = null;
+    renderEvtBar();
+    newEvt.value = '';
+    playerFree.value = '';
+
+    try {
+      vid.pause();
+      if (vid.src && vid.src.startsWith('blob:')) URL.revokeObjectURL(vid.src);
+    } catch(e){}
+    vid.removeAttribute('src');
+    vid.load();
+    timeSlider.value = 0;
+    timeLabel.textContent = '0:00';
+
+    tempStart = null;
+    redrawAll();
+  };
+
+  // ======= Export CSV =======
+  btnExport.onclick = async () => {
+  if(events.length===0){ alert('No events'); return; }
+
+  // اطلب من اليوزر اسم الماتش
+  const matchName = prompt("اكتب اسم الماتش:", "Match 1");
+  if(!matchName) return; // لو ضغط Cancel
+
+  const payload = {
+    matchName: matchName,  // ← نبعته للسيرفر
+    team1: team1Name.value.trim() || 'Team 1',
+    team2: team2Name.value.trim() || 'Team 2',
+    events: events
+  };
+
+  try {
+    const BACKEND = 'http://127.0.0.1:5000'; 
+    const res = await fetch(BACKEND + '/api/saveMatch', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('Save failed: ' + res.status);
+    const data = await res.json();
+    alert('Match saved: ' + matchName);
+
+    // اعرضه فورًا في الجدول تحت
+    renderSavedMatches();
+  } catch (err) {
+    console.error(err);
+    alert('Failed to save match: ' + err.message);
+  }
+};
+
+
+
+// ====== saved matches UI & load from server ======
+async function renderSavedMatches() {
+  const BACKEND = 'http://127.0.0.1:5000';
+  const res = await fetch(BACKEND + '/api/matches');
+  if (!res.ok) {
+    console.error("Failed to fetch matches", res.status);
+    return;
+  }
+  const matches = await res.json();
+
+  const tbody = document.getElementById("savedMatchesBody");
+  tbody.innerHTML = "";
+
+ matches.forEach((m, i) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${i+1}</td>
+    <td>${m.match_name || "Unnamed"}</td>
+    <td>${m.team1} vs ${m.team2}</td>
+    <td>${m.events_count}</td>
+    <td>${new Date(m.date_created).toLocaleString()}</td>
+    <td>
+      <a href="${BACKEND}/api/export/${m.match_id}" target="_blank">Download CSV</a> |
+      <a href="#" class="loadMatch" data-id="${m.match_id}">Load</a>
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
+
+
+
+
+  // attach click handlers
+  document.querySelectorAll('.loadMatch').forEach(a=>{
+    a.addEventListener('click', async (ev)=>{
+      ev.preventDefault();
+      const id = a.dataset.id;
+      await loadMatch(id);
+    });
+  });
+}
+
+
+
+
+async function loadMatch(matchId){
+  try {
+    const BACKEND = 'https://YOUR_BACKEND_URL'; // <-- replace for dev
+    const res = await fetch(BACKEND + '/api/events/' + matchId);
+    if(!res.ok) throw new Error('Load events failed');
+    const eventsData = await res.json();
+    // convert to the same shape your front-end uses
+    events = eventsData.map(e => ({
+      Team: e.team,
+      Player: e.player,
+      Event: e.event,
+      Outcome: e.outcome,
+      Mins: e.mins,
+      Secs: e.secs,
+      X: e.x,
+      Y: e.y,
+      X2: e.x2 ?? '',
+      Y2: e.y2 ?? ''
+    }));
+    rebuildTable();
+    redrawAll();
+    alert('Loaded match #' + matchId);
+  } catch(err){
+    console.error(err);
+    alert('Failed to load match: ' + err.message);
+  }
+}
+
+// call once page loads
+window.addEventListener('load', () => {
+  // existing onload code runs already — فقط نطلب قائمة الماتشات
+  renderSavedMatches();
+});
+
+
+
+
+async function loadMatch(matchId) {
+  const BACKEND = "http://127.0.0.1:5000";
+  const res = await fetch(BACKEND + "/api/events/" + matchId);
+  if (!res.ok) {
+    alert("Failed to load match");
+    return;
+  }
+  const eventsData = await res.json();
+
+  // رجع الداتا لشكل الـ frontend
+  events = eventsData.map(e => ({
+    Team: e.team,
+    Player: e.player,
+    Event: e.event,
+    Outcome: e.outcome,
+    Mins: e.mins,
+    Secs: e.secs,
+    X: e.x,
+    Y: e.y,
+    X2: e.x2 ?? "",
+    Y2: e.y2 ?? ""
+  }));
+
+  rebuildTable();   // تعيد بناء جدول الأحداث
+  redrawAll();      // ترسم الأحداث عالملعب
+  alert("Loaded match #" + matchId);
+}
+
+
+</script>
+
+
+<!-- Bottom Ad Space -->
+<div class="ad-container">
+  <div class="ad-placeholder ad-bottom">
+    Google AdSense Ad (728x90) - Replace this div with your AdSense code
+  </div>
+</div>
+
+
+<footer style="margin-top:20px; padding:12px; text-align:center; font-size:14px; color:#aaa; border-top:1px solid #333;">
+  Built by 
+
+  <a href="https://www.linkedin.com/in/abdelati88" target="_blank" style="color:#8b5cf6; text-decoration:none; margin:0 8px; display:inline-flex; align-items:center;">
+    <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/linkedin.svg" 
+         alt="LinkedIn" 
+         style="width:16px; height:16px; margin-right:4px; filter:invert(43%) sepia(67%) saturate(3488%) hue-rotate(226deg) brightness(95%) contrast(93%);">
+  </a>
+  <a href="https://github.com/abdelati88" target="_blank" style="color:#8b5cf6; text-decoration:none; margin:0 8px; display:inline-flex; align-items:center;">
+  <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg"
+       alt="GitHub"
+       style="width:16px; height:16px; margin-right:4px; filter:invert(37%) sepia(10%) saturate(0%) hue-rotate(202deg) brightness(60%) contrast(90%);">
+  GitHub
+</a>
+
+
+  <a href="https://www.youtube.com/@abdelati88" target="_blank" style="color:#ff0000; text-decoration:none; margin:0 8px; display:inline-flex; align-items:center;">
+    <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" 
+         alt="youtube" 
+         style="width:16px; height:16px; margin-right:4px; filter:invert(25%) sepia(87%) saturate(7472%) hue-rotate(353deg) brightness(96%) contrast(117%);">
+    
+  </a>
+</footer>
+
+
+</body>
+</html>
