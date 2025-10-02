@@ -1,0 +1,6 @@
+Flask==2.2.5
+Flask_SQLAlchemy==3.0.3
+psycopg2-binary==2.9.10
+Flask-Cors==3.0.10
+gunicorn==20.1.0
+python-dotenv==1.0.0
