@@ -4,13 +4,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime
 
+
+
 app = Flask(__name__)
 CORS(app)
 
 
 
-
-# قاعدة البيانات (SQLite افتراضيًا)
 DATABASE_URL = os.getenv("DATABASE_URL") or "sqlite:///football1.db"
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -21,7 +21,7 @@ db = SQLAlchemy(app)
 class Match(db.Model):
     __tablename__ = "matches"
     match_id = db.Column(db.Integer, primary_key=True)
-    match_name = db.Column(db.String(200))  # ← هنا العمود الجديد
+    match_name = db.Column(db.String(200))  
 
     team1 = db.Column(db.String(200))
     team2 = db.Column(db.String(200))
@@ -59,7 +59,6 @@ def save_match():
     db.session.add(match)
     db.session.commit()
 
-    # حفظ الأحداث
     for ev in events:
         def to_float(v):
             try:
@@ -131,7 +130,6 @@ def export_match_csv(match_id):
     if not rows:
         return jsonify({"error": "No events"}), 404
 
-    # عنوان الأعمدة
     header = "Team,Player,Event,Outcome,Mins,Secs,X,Y,X2,Y2\n"
     lines = []
     for r in rows:
@@ -144,9 +142,10 @@ def export_match_csv(match_id):
         headers={"Content-Disposition": f"attachment;filename=match_{match_id}.csv"}
     )
 
+with app.app_context():
+    db.create_all()
 
 # -------- Run --------
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
+    
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
