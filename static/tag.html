@@ -160,7 +160,7 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
   <div class="header-container" style="margin-bottom: 8px;">
   <h1>Local Match Tagger </h1>
   <div class="header-buttons">
-    <a href="https://github.com/YOUR_USERNAME/YOUR_REPO" target="_blank" class="github-star">
+    <a href="https://github.com/abdelati88/match_tag" target="_blank" class="github-star">
       <svg viewBox="0 0 16 16" style="width:16px;height:16px;vertical-align:middle;"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
       Star
     </a>
@@ -235,7 +235,7 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
 
             <label>Player</label>
             <select id="playerSel" class="select" style="min-width:140px"></select>
-            <input id="playerFree" class="input" placeholder="or write it manually" style="width:170px">  <!-- لو مفيش الأصل موجود -->
+            <input id="playerFree" class="input" placeholder="or write it manually" style="width:170px">  
 
             <div class="row" id="passOutcomeWrap" style="margin-top:8px; display:none">
               <label>Pass outcome</label>
@@ -260,7 +260,6 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
 <div class="row" id="dribbleOutcomeWrap" style="margin-top:8px; display:none">
   <label>Dribble outcome</label>
   <select id="dribbleOutcome" class="select" style="min-width:180px;">
-    <option value="">Select</option>
     <option value="Successful">Successful</option>
     <option value="Failed">Failed</option>
   </select>
@@ -784,7 +783,7 @@ redrawAll();
   };
 
   try {
-    const BACKEND = 'http://127.0.0.1:5000'; 
+    const BACKEND = 'https://abdelati88.shop'; 
     const res = await fetch(BACKEND + '/api/saveMatch', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
@@ -805,7 +804,7 @@ redrawAll();
 
 // ====== saved matches UI & load from server ======
 async function renderSavedMatches() {
-  const BACKEND = 'http://127.0.0.1:5000';
+  const BACKEND = 'https://abdelati88.shop';
   const res = await fetch(BACKEND + '/api/matches');
   if (!res.ok) {
     console.error("Failed to fetch matches", res.status);
@@ -850,7 +849,7 @@ async function renderSavedMatches() {
 
 async function loadMatch(matchId){
   try {
-    const BACKEND = 'https://YOUR_BACKEND_URL'; // <-- replace for dev
+    const BACKEND = 'https://https://abdelati88.shop'; // 
     const res = await fetch(BACKEND + '/api/events/' + matchId);
     if(!res.ok) throw new Error('Load events failed');
     const eventsData = await res.json();
@@ -886,7 +885,7 @@ window.addEventListener('load', () => {
 
 
 async function loadMatch(matchId) {
-  const BACKEND = "http://127.0.0.1:5000";
+  const BACKEND = "https://abdelati88.shop";
   const res = await fetch(BACKEND + "/api/events/" + matchId);
   if (!res.ok) {
     alert("Failed to load match");
@@ -894,7 +893,6 @@ async function loadMatch(matchId) {
   }
   const eventsData = await res.json();
 
-  // رجع الداتا لشكل الـ frontend
   events = eventsData.map(e => ({
     Team: e.team,
     Player: e.player,
@@ -908,8 +906,8 @@ async function loadMatch(matchId) {
     Y2: e.y2 ?? ""
   }));
 
-  rebuildTable();   // تعيد بناء جدول الأحداث
-  redrawAll();      // ترسم الأحداث عالملعب
+  rebuildTable();   
+  redrawAll();     
   alert("Loaded match #" + matchId);
 }
 
