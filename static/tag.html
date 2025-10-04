@@ -7,6 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Shared Match Tagger </title>
 <style>
+
+
+
   :root { --bg:#111827; --panel:#1f2937; --soft:#374151; --accent:#4cdeab; --text:#e5e7eb; }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
@@ -49,7 +52,7 @@ h1{font-size:13px;margin:0 0 4px}
   th,td{padding:6px 8px;border-bottom:1px solid #374151;text-align:center;white-space:nowrap}
   th{position:sticky;top:0;background:#273244;z-index:1}
 canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;background:#1a472a}
-  .legend{display:flex;gap:8px;align-items:center;font-size:12px;opacity:.9}
+  .legend{display:none;gap:8px;align-items:center;font-size:12px;opacity:.9}
   .dot{width:12px;height:12px;border-radius:50%}
   .muted{opacity:.8}
   .grow{flex:1}
@@ -151,6 +154,18 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
   display:grid;
   grid-template-columns:1fr;
   gap:16px;
+}
+
+
+#savedMatchesTable a {
+  color: #21e0b6; 
+  font-weight: bold;
+}
+#savedMatchesTable a.loadMatch {
+  color: #4da6ff; 
+}
+#savedMatchesTable a:hover {
+  color: #ff533d;
 }
 
 
@@ -356,7 +371,7 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
       </div>
         <!-- Saved Matches -->
   <h2 style="margin-top:10px">Saved Matches</h2>
-  <div class="table" style="height:150px; overflow:auto;">
+<div class="table" id="savedMatchesTable" style="height:150px; overflow:auto;">
     <table style="width:100%; border-collapse:collapse; font-size:13px;">
       <thead>
   <tr>
@@ -1197,7 +1212,7 @@ async function loadMatch(matchId) {
       <h3 style="margin:0 0 5px; color:#fff; font-size:15.5px;">Contact</h3>
       <p style="margin:0; font-size:13.5px; color:#ccc;">
         <a href="mailto:edenmohamed88@gmail.com"
-           style="color:#f9f9fa; font-weight:bold; text-decoration:underline;">
+           style="color:#ccc; font-weight:bold; text-decoration:underline;">
           edenmohamed88@gmail.com
         </a>
       </p>
