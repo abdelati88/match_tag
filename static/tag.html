@@ -11,7 +11,7 @@
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
 .wrap{max-width:97%;margin:20px auto;padding:0 16px}
-.grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:16px}  .card{background:var(--panel);border:1px solid var(--soft);border-radius:12px;padding:12px}
+.grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:16px}  .card{background:var(--panel);border:1px solid var(--soft);border-radius:12px;padding:12px;  position: relative;}
 h1{font-size:13px;margin:0 0 4px}
 .header-container {
   display: flex;
@@ -173,10 +173,12 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
     <!-- Top Ad Space -->
   <div class="ad-container">
     <div class="ad-placeholder ad-top">
-      Google AdSense Ad (728x90) - Replace this div with your AdSense code
+      Google AdSense Ad 
     </div>
   </div>
 
+
+  
 
    <div class="main-layout">
     <div>
@@ -249,23 +251,41 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
 
 
           </div>
-<div class="row" id="shotOutcomeWrap" style="margin-top:8px; display:none">
-  <label>Shot outcome</label>
-  <select id="shotOutcome" class="select" style="min-width:180px">
-    <option value="Goal">Goal</option>
-    <option value="Saved">Saved</option>
-    <option value="Off Target">Off Target</option>
-    <option value="Blocked">Blocked</option>
-  </select>
-</div>
+        <div class="row" id="shotOutcomeWrap" style="margin-top:8px; display:none">
+          <label>Shot outcome</label>
+          <select id="shotOutcome" class="select" style="min-width:180px">
+            <option value="Goal">Goal</option>
+            <option value="Saved">Saved</option>
+            <option value="Off Target">Off Target</option>
+            <option value="Blocked">Blocked</option>
+          </select>
+        </div>
 
-<div class="row" id="dribbleOutcomeWrap" style="margin-top:8px; display:none">
-  <label>Dribble outcome</label>
-  <select id="dribbleOutcome" class="select" style="min-width:180px;">
-    <option value="Successful">Successful</option>
-    <option value="Failed">Failed</option>
-  </select>
-</div>
+        <div class="row" id="crossOutcomeWrap" style="margin-top:8px; display:none">
+          <label>Cross outcome</label>
+          <select id="crossOutcome" class="select" style="min-width:180px;">
+            <option value="Successful">Successful</option>
+            <option value="Unsuccessful">Unsuccessful</option>
+          </select>
+        </div>
+
+
+        <div class="row" id="dribbleOutcomeWrap" style="margin-top:8px; display:none">
+          <label>Dribble outcome</label>
+          <select id="dribbleOutcome" class="select" style="min-width:180px;">
+            <option value="Successful">Successful</option>
+            <option value="Failed">Failed</option>
+          </select>
+        </div>
+
+        <div class="row" id="tackleOutcomeWrap" style="margin-top:8px; display:none">
+          <label>Tackle outcome</label>
+          <select id="tackleOutcome" class="select" style="min-width:180px;">
+            <option value="Successful">Successful</option>
+            <option value="Unsuccessful">Unsuccessful</option>
+          </select>
+        </div>
+
 
 
           <h2 style="margin-top:10px">Event Types</h2>
@@ -281,7 +301,34 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
     <!-- RIGHT: pitch + table -->
     <div class="card">
       <h2>Pitch (120 × 80)</h2>
+
+      <div style="position: absolute; right: 48px; top: 12px; z-index: 20;">
+  <label for="halfSelect"
+ style="font-size:16px; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
+ font-weight:700; color:#e5e7eb; margin-left:8px;">
+ Current Half:
+</label>
+
+  <select id="halfSelect" name="halfSelect"
+    style="
+      font-size:16px;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
+      color:#e5e7eb;
+      background:#374151;
+      border-radius:7px;
+      border:none;
+      padding:4px 12px;
+      font-weight: 600;
+    ">
+    <option value="1">first</option>
+    <option value="2">second</option>
+  </select>
+</div>
+
+
       <canvas id="pitch" width="1200" height="800"></canvas>
+
+      
 
       <h2 style="margin-top:10px">Events</h2>
       <div class="row" style="margin-bottom:6px">
@@ -338,10 +385,20 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
 
 <script>
 
+
+  
   function updatePassOutcomeVisibility(){
   const isPass = (currentEventType || '').toLowerCase() === 'pass';
   document.getElementById('passOutcomeWrap').style.display = isPass ? 'flex' : 'none';
 }
+
+
+function updateCrossOutcomeVisibility() {
+  const isCross = currentEventType && currentEventType.toLowerCase() === "cross";
+  document.getElementById('crossOutcomeWrap').style.display = isCross ? 'flex' : 'none';
+}
+
+
 function updateDribbleOutcomeVisibility() {
   const isDribble = currentEventType && currentEventType.toLowerCase() === "dribble";
   document.getElementById('dribbleOutcomeWrap').style.display = isDribble ? 'flex' : 'none';
@@ -394,6 +451,10 @@ function updateDribbleOutcomeVisibility() {
 
   const pitch = document.getElementById('pitch');
   const ctx = pitch.getContext('2d');
+  const PADDING = 20;
+const FIELD_WIDTH = pitch.width - 2 * PADDING;
+const FIELD_HEIGHT = pitch.height - 2 * PADDING;
+
 
   const btnResetSoft = document.getElementById('btnResetSoft');
 
@@ -402,10 +463,19 @@ function updateDribbleOutcomeVisibility() {
 
   const dribbleOutcomeWrap = document.getElementById('dribbleOutcomeWrap');
 const dribbleOutcome = document.getElementById('dribbleOutcome');
+const crossOutcome = document.getElementById('crossOutcome');
+
 
 
   // ======= State =======
   let events = [];
+  let currentHalf = 1;  
+  const halfSelect = document.getElementById('halfSelect');
+halfSelect.addEventListener('change', function() {
+  currentHalf = parseInt(this.value);
+});
+
+
   let currentEventType = null;
   let tempStart = null;   
   const FPS = 25;
@@ -419,7 +489,7 @@ const dribbleOutcome = document.getElementById('dribbleOutcome');
     team2Name:'Away',
     t1Roster: defaultRoster('H'),
     t2Roster: defaultRoster('A'),
-    eventTypes: ['Shot','Shot Assist','Pass','Cross','Dribble']
+    eventTypes: ['Shot','Shot Assist','Pass','Cross','Dribble','Tackle','Interception','Block','Clearance']
   };
 
 
@@ -467,6 +537,12 @@ const dribbleOutcome = document.getElementById('dribbleOutcome');
   shotOutcomeWrap.style.display = isShot ? "flex" : "none";
   dribbleOutcomeWrap.style.display = isDribble ? "flex" : "none";
 }
+
+function updateTackleOutcomeVisibility() {
+  const isTackle = currentEventType && currentEventType.toLowerCase() === "tackle";
+  document.getElementById('tackleOutcomeWrap').style.display = isTackle ? 'flex' : 'none';
+}
+
 
 
   saveTeams.onclick = ()=>{
@@ -516,7 +592,7 @@ const dribbleOutcome = document.getElementById('dribbleOutcome');
       wrap.className='evtBtn';
       const btn = document.createElement('button');
       btn.textContent = nm;
-      btn.onclick = () => {
+ btn.onclick = () => {
   currentEventType = nm;
   [...evtBar.querySelectorAll('button')].forEach(b => b.style.outline = 'none');
   btn.style.outline = '2px solid var(--accent)';
@@ -524,6 +600,8 @@ const dribbleOutcome = document.getElementById('dribbleOutcome');
   updateShotOutcomeVisibility();
   updatePassOutcomeVisibility();
    updateDribbleOutcomeVisibility()
+    updateTackleOutcomeVisibility();
+    updateCrossOutcomeVisibility();
 };
 
       const del = document.createElement('button');
@@ -600,35 +678,170 @@ const dribbleOutcome = document.getElementById('dribbleOutcome');
     ctx.strokeRect(pitch.width-20-boxW,(pitch.height-boxH)/2,boxW,boxH);
     ctx.strokeRect(pitch.width-20-areaW,(pitch.height-areaH)/2,areaW,areaH);
   }
-  function drawArrow(x1,y1,x2,y2){
-    ctx.strokeStyle = '#22d3ee'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-    const ang = Math.atan2(y2-y1, x2-x1), head=14;
-    ctx.beginPath(); ctx.moveTo(x2,y2);
-    ctx.lineTo(x2 - head*Math.cos(ang - Math.PI/6), y2 - head*Math.sin(ang - Math.PI/6));
-    ctx.lineTo(x2 - head*Math.cos(ang + Math.PI/6), y2 - head*Math.sin(ang + Math.PI/6));
-    ctx.closePath(); ctx.fillStyle = '#22d3ee'; ctx.fill();
-    ctx.fillStyle='#e5e7eb'; ctx.beginPath(); ctx.arc(x1,y1,6,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#ef4444'; ctx.beginPath(); ctx.arc(x2,y2,6,0,Math.PI*2); ctx.fill();
-  }
-  function redrawAll(){
-    drawPitch();
-    for(const ev of events){
-      const sx = ev.X/120*pitch.width, sy=ev.Y/80*pitch.height;
+  function drawArrow(x1, y1, x2, y2, color='#22d3ee') {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  const ang = Math.atan2(y2 - y1, x2 - x1), head = 14;
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - head * Math.cos(ang - Math.PI / 6), y2 - head * Math.sin(ang - Math.PI / 6));
+  ctx.lineTo(x2 - head * Math.cos(ang + Math.PI / 6), y2 - head * Math.sin(ang + Math.PI / 6));
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.fillStyle = '#e5e7eb';
+  ctx.beginPath();
+  ctx.arc(x1, y1, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x2, y2, 6, 0, Math.PI * 2);
+  ctx.fill();
+}
 
-      if(ev.X2 !== '' && ev.Y2 !== '' && ev.X2 != null && ev.Y2 != null){
-        const ex = ev.X2/120*pitch.width, ey=ev.Y2/80*pitch.height;
-        drawArrow(sx,sy,ex,ey);
-      } else {
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath(); ctx.arc(sx,sy,6,0,Math.PI*2); ctx.fill();
-      }
-    }
-    if(tempStart){
-      ctx.fillStyle='#e5e7eb'; ctx.beginPath(); ctx.arc(tempStart.x,tempStart.y,6,0,Math.PI*2); ctx.fill();
-    }
+function normalize(x, y, half) {
+  if (half === 2) {
+    return { 
+      x: 120 - x, 
+      y: 80 - y    
+    };
   }
-  redrawAll();
+  return { x: x, y: y };
+}
+
+function redrawAll() {
+  drawPitch();
+
+  for (const ev of events) {
+    let start = normalize(ev.X, ev.Y, ev.half);
+    let sx = (start.x / 120) * (pitch.width - 2 * PADDING) + PADDING;
+let sy = (start.y / 80)  * (pitch.height - 2 * PADDING) + PADDING;
+
+if (ev.Event.toLowerCase() === "tackle") {
+  ctx.fillStyle = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
+  ctx.fillRect(sx - 10, sy - 10, 20, 20);
+
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  continue;
+}
+
+
+    let ex = null, ey = null;
+    if (ev.X2 !== '' && ev.Y2 !== '' && ev.X2 != null && ev.Y2 != null) {
+      let end = normalize(ev.X2, ev.Y2, ev.half);
+      ex = end.x / 120 * pitch.width;
+      ey = end.y / 80 * pitch.height;
+    }
+
+if (ev.Event.toLowerCase() === "tackle") {
+  ctx.fillStyle = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
+  ctx.beginPath();
+  ctx.arc(sx, sy, 8, 0, Math.PI * 2);
+  ctx.fill();
+  continue;
+}
+
+
+
+if (ev.Event.toLowerCase() === "interception") {
+  ctx.fillStyle = "#f59e42"; 
+  ctx.beginPath();
+  ctx.arc(sx, sy, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(sx-6, sy-6);
+  ctx.lineTo(sx+6, sy+6);
+  ctx.moveTo(sx+6, sy-6);
+  ctx.lineTo(sx-6, sy+6);
+  ctx.stroke();
+  continue;
+}
+
+if (ev.Event.toLowerCase() === "block") {
+  ctx.fillStyle = "#111";
+  ctx.fillRect(sx - 10, sy - 10, 20, 20);
+
+  ctx.strokeStyle = "#e53935"; 
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(sx - 9, sy - 9);
+  ctx.lineTo(sx + 9, sy + 9);
+  ctx.moveTo(sx + 9, sy - 9);
+  ctx.lineTo(sx - 9, sy + 9);
+  ctx.stroke();
+
+  continue;
+}
+
+
+if (ev.Event.toLowerCase() === "clearance") {
+  drawArrow(sx, sy, ex, ey, "#6366f1"); 
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(ex-8, ey-8);
+  ctx.lineTo(ex+8, ey+8);
+  ctx.moveTo(ex+8, ey-8);
+  ctx.lineTo(ex-8, ey+8);
+  ctx.stroke();
+  continue;
+}
+
+
+    if (ex !== null && ey !== null) {
+      let arrowColor = '#22d3ee'; 
+
+if (ev.Event.toLowerCase() === "pass") {
+  arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
+} else if (ev.Event.toLowerCase() === "dribble") {
+  arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
+} else if (ev.Event.toLowerCase() === "shot") {
+  arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "goal") ? "#22de4c" : "#e53935";
+} else if (ev.Event.toLowerCase() === "cross") {
+    arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
+  }
+
+
+drawArrow(sx, sy, ex, ey, arrowColor);
+
+    } else {
+  let dotColor = '#ef4444'; 
+
+  if (ev.Event.toLowerCase() === 'shot') {
+    dotColor = (ev.Outcome && ev.Outcome.toLowerCase() === 'goal') ? '#22de4c' : '#ef4444';
+  }
+
+  ctx.fillStyle = dotColor;
+  ctx.beginPath();
+  ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+  }
+
+  if (tempStart) {
+    ctx.fillStyle = '#e5e7eb';
+    ctx.beginPath();
+    ctx.arc(tempStart.x, tempStart.y, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+  
+
+ 
+
+redrawAll();
   window.addEventListener('resize', redrawAll);
 
   // ======= Add events by clicking the pitch =======
@@ -637,42 +850,61 @@ const dribbleOutcome = document.getElementById('dribbleOutcome');
 
   pitch.addEventListener('click', (e) => {
     const rect = pitch.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (pitch.width / rect.width);
-    const y = (e.clientY - rect.top)  * (pitch.height / rect.height);
+const xRaw = (e.clientX - rect.left) * (pitch.width / rect.width);
+const yRaw = (e.clientY - rect.top)  * (pitch.height / rect.height);
+const x = Math.max(PADDING, Math.min(pitch.width - PADDING, xRaw));
+const y = Math.max(PADDING, Math.min(pitch.height - PADDING, yRaw));
 
     const evType = currentEventType || (boot.eventTypes[0]||'Event');
 
-    if ((evType || '').toLowerCase() === 'shot') {
-      const X  = +(x / pitch.width  * 120).toFixed(1);
-      const Y  = +(y / pitch.height * 80 ).toFixed(1);
+    const singleClickEvents = ['shot', 'tackle', 'interception', 'block'];
+if (singleClickEvents.includes(evType.toLowerCase())) {
+ const X  = +(((x - PADDING) / (pitch.width - 2 * PADDING)) * 120).toFixed(1);
+const Y  = +(((y - PADDING) / (pitch.height - 2 * PADDING)) * 80).toFixed(1);
 
-      const t = Math.max(0, vid.currentTime||0);
-      const mins = Math.floor(t/60), secs=Math.floor(t%60);
+  const t = Math.max(0, vid.currentTime||0);
+  const mins = Math.floor(t/60), secs=Math.floor(t%60);
 
-      const whichTeam = teamSel.value;
-      const teamName  = whichTeam==='T1' ? team1Name.value.trim()||'Team 1' : team2Name.value.trim()||'Team 2';
+  const whichTeam = teamSel.value;
+  const teamName  = whichTeam==='T1' ? team1Name.value.trim()||'Team 1' : team2Name.value.trim()||'Team 2';
 
-      let player = playerFree.value.trim();
-      if(!player) player = playerSel.value || '';
+  let player = playerFree.value.trim();
+  if(!player) player = playerSel.value || '';
 
-      let outcome = '';
-      if ((evType || '').toLowerCase() === 'shot') {
+  let outcome = '';
+if (evType.toLowerCase() === 'shot') {
   outcome = shotOutcome ? (shotOutcome.value || '') : '';
-} else if ((evType || '').toLowerCase() === 'pass') {
+} else if (evType.toLowerCase() === 'pass') {
   outcome = passOutcome ? (passOutcome.value || '') : '';
-} else if ((evType || '').toLowerCase() === 'dribble') {
+} else if (evType.toLowerCase() === 'dribble') {
   outcome = dribbleOutcome ? (dribbleOutcome.value || '') : '';
+} else if (evType.toLowerCase() === 'tackle') {
+  outcome = tackleOutcome ? (tackleOutcome.value || '') : '';
+}else if (evType.toLowerCase() === 'cross') {
+  outcome = crossOutcome ? (crossOutcome.value || '') : '';
 }
 
 
-      const row = { Team: teamName, Player: player, Event: evType, Outcome: outcome, Mins: mins, Secs: secs, X, Y, X2: '', Y2: '' };
-      events.push(row);
-      appendRow(row);
+  const row = {
+    Team: teamName,
+    Player: player,
+    Event: evType,
+    Outcome: outcome,
+    Mins: mins,
+    Secs: secs,
+    X,
+    Y,
+    X2: '',
+    Y2: '',
+    half: currentHalf
+  };
 
-      tempStart = null;
-      redrawAll();
-      return;
-    }
+  events.push(row);
+  appendRow(row);
+  tempStart = null;
+  redrawAll();
+  return;
+}
 
     if(!tempStart){ tempStart = {x,y}; redrawAll(); return; }
 
@@ -699,8 +931,23 @@ if ((evType || '').toLowerCase() === 'shot') {
 } else if ((evType || '').toLowerCase() === 'dribble') {
   outcome = dribbleOutcome ? (dribbleOutcome.value || '') : '';
 }
+else if ((evType || '').toLowerCase() === 'cross') {
+  outcome = crossOutcome ? (crossOutcome.value || '') : '';
+}
 
-const row = { Team: teamName, Player: player, Event: evType, Outcome: outcome, Mins: mins, Secs: secs, X, Y, X2, Y2 };
+const row = {
+  Team: teamName,
+  Player: player,
+  Event: evType,
+  Outcome: outcome,
+  Mins: mins,
+  Secs: secs,
+  X,
+  Y,
+  X2,
+  Y2,
+  half: currentHalf  
+};
 
 
 events.push(row);
@@ -920,33 +1167,49 @@ async function loadMatch(matchId) {
 <!-- Bottom Ad Space -->
 <div class="ad-container">
   <div class="ad-placeholder ad-bottom">
-    Google AdSense Ad (728x90) - Replace this div with your AdSense code
+    Google AdSense Ad 
   </div>
 </div>
 
+<footer style="margin-top:18px; padding:8px 0; text-align:center; font-size:14px; color:#aaa; border-top:1px solid #333; background:#161e2a;">
+  <div style="margin-bottom:8px; display:flex; justify-content:center; gap:10px; align-items:center;">
+    <span style="font-size:14px;">Built by</span>
+    <a href="https://www.linkedin.com/in/abdelati88" target="_blank" style="display:inline-flex;align-items:center;">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/linkedin.svg" alt="LinkedIn" style="width:19px;height:19px;filter:invert(43%) sepia(67%) saturate(3488%) hue-rotate(226deg) brightness(95%) contrast(93%);"/>
+    </a>
+    <a href="https://github.com/abdelati88" target="_blank" style="display:inline-flex;align-items:center;">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="GitHub" style="width:19px;height:19px;filter:invert(37%) sepia(10%) saturate(0%) hue-rotate(202deg) brightness(60%) contrast(90%);"/>
+    </a>
+    <a href="https://www.youtube.com/@abdelati88" target="_blank" style="display:inline-flex;align-items:center;">
+      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" alt="YouTube" style="width:19px;height:19px;filter:invert(25%) sepia(87%) saturate(7472%) hue-rotate(353deg) brightness(96%) contrast(117%);"/>
+    </a>
+  </div>
 
-<footer style="margin-top:20px; padding:12px; text-align:center; font-size:14px; color:#aaa; border-top:1px solid #333;">
-  Built by 
-
-  <a href="https://www.linkedin.com/in/abdelati88" target="_blank" style="color:#8b5cf6; text-decoration:none; margin:0 8px; display:inline-flex; align-items:center;">
-    <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/linkedin.svg" 
-         alt="LinkedIn" 
-         style="width:16px; height:16px; margin-right:4px; filter:invert(43%) sepia(67%) saturate(3488%) hue-rotate(226deg) brightness(95%) contrast(93%);">
-  </a>
-  <a href="https://github.com/abdelati88" target="_blank" style="color:#8b5cf6; text-decoration:none; margin:0 8px; display:inline-flex; align-items:center;">
-  <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg"
-       alt="GitHub"
-       style="width:16px; height:16px; margin-right:4px; filter:invert(37%) sepia(10%) saturate(0%) hue-rotate(202deg) brightness(60%) contrast(90%);">
-  GitHub
-</a>
-
-
-  <a href="https://www.youtube.com/@abdelati88" target="_blank" style="color:#ff0000; text-decoration:none; margin:0 8px; display:inline-flex; align-items:center;">
-    <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" 
-         alt="youtube" 
-         style="width:16px; height:16px; margin-right:4px; filter:invert(25%) sepia(87%) saturate(7472%) hue-rotate(353deg) brightness(96%) contrast(117%);">
-    
-  </a>
+  <div style="display:grid; grid-template-columns:2fr 1.3fr 2fr; max-width:850px; margin:0 auto; text-align:center; gap:8px;">
+    <div style="padding:4px 14px;">
+      <h3 style="margin:0 0 5px; color:#fff; font-size:15.5px;">About</h3>
+      <p style="margin:0; color:#ccc; font-size:13.5px; line-height:1.55;">
+        This tool lets you upload match videos and tag important in-game events. 
+        Easy, fast, and useful for coaches and analysts.
+      </p>
+    </div>
+    <div style="padding:4px 8px;">
+      <h3 style="margin:0 0 5px; color:#fff; font-size:15.5px;">Contact</h3>
+      <p style="margin:0; font-size:13.5px; color:#ccc;">
+        <a href="mailto:edenmohamed88@gmail.com"
+           style="color:#f9f9fa; font-weight:bold; text-decoration:underline;">
+          edenmohamed88@gmail.com
+        </a>
+      </p>
+    </div>
+    <div style="padding:4px 14px;">
+      <h3 style="margin:0 0 5px; color:#fff; font-size:15.5px;">Privacy Policy</h3>
+      <p style="margin:0; color:#e8eff2; font-size:13.5px; line-height:1.55;">
+        No personal data is collected or shared with third parties. 
+        We ensure your privacy is fully respected.
+      </p>
+    </div>
+  </div>
 </footer>
 
 
