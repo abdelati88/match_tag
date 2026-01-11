@@ -195,14 +195,10 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
   font-size:15.3px;
   color:#e5e7eb;
 ">
-  Effortlessly tag, analyze, and export football match events.  
-  This tool lets you upload any match video, select teams and players, and mark every pass, shot, tackle, or key action as you watch.  
-  Instantly generate stats and downloadable reports for analysts, coaches, and fans.  
-  No login required and all data stays private on your device!
+  Effortlessly tag, analyze, and export football match events. All data stays private on your device!
 </div>
 
-    <!-- Top Ad Space -->
-  <div class="ad-container">
+    <div class="ad-container">
     <div class="ad-placeholder ad-top">
       Google AdSense Ad 
     </div>
@@ -215,7 +211,6 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
     <div>
       <div class="grid">
 
-    <!-- LEFT: video + controls -->
     <div class="card">
       <h2>🎞️ Local Video</h2>
       <div class="row">
@@ -234,7 +229,6 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
       </div>
 
       <div class="cols" style="margin-top:12px">
-        <!-- Teams / Rosters -->
         <div class="card">
           <h2>Teams & Lineups</h2>
           <div class="row">
@@ -259,7 +253,6 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
           </div>
         </div>
 
-        <!-- Selection -->
         <div class="card">
           <h2>Selection</h2>
           <div class="row">
@@ -329,7 +322,6 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
       </div>
     </div>
 
-    <!-- RIGHT: pitch + table -->
     <div class="card">
       <h2>Pitch (120 × 80)</h2>
 
@@ -385,8 +377,7 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
           <tbody></tbody>
         </table>
       </div>
-        <!-- Saved Matches -->
-  <h2 style="margin-top:10px">Saved Matches</h2>
+        <h2 style="margin-top:10px">Saved Matches</h2>
 <div class="table" id="savedMatchesTable" style="height:150px; overflow:auto;">
     <table style="width:100%; border-collapse:collapse; font-size:13px;">
       <thead>
@@ -408,13 +399,7 @@ canvas{width:100%;height:500px;border-radius:12px;border:1px solid #4b5563;backg
   </div>
 </div>
 
-      </div> <!-- end of grid -->
-    </div> <!-- end of main content -->
-    
-   
-
-
-<script>
+      </div> </div> <script>
 
 
   
@@ -504,6 +489,7 @@ const crossOutcome = document.getElementById('crossOutcome');
   const halfSelect = document.getElementById('halfSelect');
 halfSelect.addEventListener('change', function() {
   currentHalf = parseInt(this.value);
+  redrawAll();
 });
 
 
@@ -624,12 +610,12 @@ function updateTackleOutcomeVisibility() {
       const btn = document.createElement('button');
       btn.textContent = nm;
  btn.onclick = () => {
-  currentEventType = nm;
-  [...evtBar.querySelectorAll('button')].forEach(b => b.style.outline = 'none');
-  btn.style.outline = '2px solid var(--accent)';
+ currentEventType = nm;
+ [...evtBar.querySelectorAll('button')].forEach(b => b.style.outline = 'none');
+ btn.style.outline = '2px solid var(--accent)';
   
-  updateShotOutcomeVisibility();
-  updatePassOutcomeVisibility();
+ updateShotOutcomeVisibility();
+ updatePassOutcomeVisibility();
    updateDribbleOutcomeVisibility()
     updateTackleOutcomeVisibility();
     updateCrossOutcomeVisibility();
@@ -730,167 +716,93 @@ function updateTackleOutcomeVisibility() {
 }
 
   function drawArrow(x1, y1, x2, y2, color='#22d3ee') {
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  ctx.stroke();
-  const ang = Math.atan2(y2 - y1, x2 - x1), head = 14;
-  ctx.beginPath();
-  ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - head * Math.cos(ang - Math.PI / 6), y2 - head * Math.sin(ang - Math.PI / 6));
-  ctx.lineTo(x2 - head * Math.cos(ang + Math.PI / 6), y2 - head * Math.sin(ang + Math.PI / 6));
-  ctx.closePath();
-  ctx.fillStyle = color;
-  ctx.fill();
-  ctx.fillStyle = '#e5e7eb';
-  ctx.beginPath();
-  ctx.arc(x1, y1, 6, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.arc(x2, y2, 6, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  const ang = Math.atan2(y2 - y1, x2 - x1), head = 14;
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - head * Math.cos(ang - Math.PI / 6), y2 - head * Math.sin(ang - Math.PI / 6));
+  ctx.lineTo(x2 - head * Math.cos(ang + Math.PI / 6), y2 - head * Math.sin(ang + Math.PI / 6));
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.fillStyle = '#e5e7eb';
+  ctx.beginPath();
+  ctx.arc(x1, y1, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x2, y2, 6, 0, Math.PI * 2);
+  ctx.fill();
 }
 
-function normalize(x, y, half) {
-  if (half === 2) {
-    return { 
-      x: 120 - x, 
-      y: 80 - y    
-    };
-  }
-  return { x: x, y: y };
-}
 
 function redrawAll() {
   drawPitch();
 
   for (const ev of events) {
-    let start = normalize(ev.X, ev.Y, ev.half);
-    let sx = (start.x / 120) * (pitch.width - 2 * PADDING) + PADDING;
-let sy = (start.y / 80)  * (pitch.height - 2 * PADDING) + PADDING;
+    // التعديل هنا: بما أن البيانات تم قلبها مسبقاً في الحفظ، نرسمها كما هي في الجدول
+    let sx = (ev.X / 120) * (pitch.width - 2 * PADDING) + PADDING;
+    let sy = (ev.Y / 80)  * (pitch.height - 2 * PADDING) + PADDING;
 
-if (ev.Event.toLowerCase() === "tackle") {
-  ctx.fillStyle = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
-  ctx.fillRect(sx - 10, sy - 10, 20, 20);
-
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.arc(sx, sy, 6, 0, Math.PI * 2);
-  ctx.fill();
-
-  continue;
-}
-
-
-    let ex = null, ey = null;
-    if (ev.X2 !== '' && ev.Y2 !== '' && ev.X2 != null && ev.Y2 != null) {
-      let end = normalize(ev.X2, ev.Y2, ev.half);
-      ex = end.x / 120 * pitch.width;
-      ey = end.y / 80 * pitch.height;
+    if (ev.Event.toLowerCase() === "tackle") {
+      ctx.fillStyle = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
+      ctx.fillRect(sx - 10, sy - 10, 20, 20);
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(sx, sy, 6, 0, Math.PI * 2); ctx.fill();
+      continue;
     }
 
-if (ev.Event.toLowerCase() === "tackle") {
-  ctx.fillStyle = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
-  ctx.beginPath();
-  ctx.arc(sx, sy, 8, 0, Math.PI * 2);
-  ctx.fill();
-  continue;
-}
+    let ex = null, ey = null;
+    if (ev.X2 !== '' && ev.X2 != null) {
+      ex = (ev.X2 / 120) * (pitch.width - 2 * PADDING) + PADDING;
+      ey = (ev.Y2 / 80)  * (pitch.height - 2 * PADDING) + PADDING;
+    }
 
+    if (ev.Event.toLowerCase() === "interception") {
+      ctx.fillStyle = "#f59e42"; ctx.beginPath(); ctx.arc(sx, sy, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(sx-6, sy-6); ctx.lineTo(sx+6, sy+6); ctx.moveTo(sx+6, sy-6); ctx.lineTo(sx-6, sy+6); ctx.stroke();
+      continue;
+    }
 
+    if (ev.Event.toLowerCase() === "block") {
+      ctx.fillStyle = "#111"; ctx.fillRect(sx - 10, sy - 10, 20, 20);
+      ctx.strokeStyle = "#e53935"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(sx - 9, sy - 9); ctx.lineTo(sx + 9, sy + 9); ctx.moveTo(sx + 9, sy - 9); ctx.lineTo(sx - 9, sy + 9); ctx.stroke();
+      continue;
+    }
 
-if (ev.Event.toLowerCase() === "interception") {
-  ctx.fillStyle = "#f59e42"; 
-  ctx.beginPath();
-  ctx.arc(sx, sy, 8, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(sx-6, sy-6);
-  ctx.lineTo(sx+6, sy+6);
-  ctx.moveTo(sx+6, sy-6);
-  ctx.lineTo(sx-6, sy+6);
-  ctx.stroke();
-  continue;
-}
-
-if (ev.Event.toLowerCase() === "block") {
-  ctx.fillStyle = "#111";
-  ctx.fillRect(sx - 10, sy - 10, 20, 20);
-
-  ctx.strokeStyle = "#e53935"; 
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(sx - 9, sy - 9);
-  ctx.lineTo(sx + 9, sy + 9);
-  ctx.moveTo(sx + 9, sy - 9);
-  ctx.lineTo(sx - 9, sy + 9);
-  ctx.stroke();
-
-  continue;
-}
-
-
-if (ev.Event.toLowerCase() === "clearance") {
-  drawArrow(sx, sy, ex, ey, "#6366f1"); 
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(ex-8, ey-8);
-  ctx.lineTo(ex+8, ey+8);
-  ctx.moveTo(ex+8, ey-8);
-  ctx.lineTo(ex-8, ey+8);
-  ctx.stroke();
-  continue;
-}
-
+    if (ev.Event.toLowerCase() === "clearance") {
+      drawArrow(sx, sy, ex, ey, "#6366f1");
+      ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(ex-8, ey-8); ctx.lineTo(ex+8, ey+8); ctx.moveTo(ex+8, ey-8); ctx.lineTo(ex-8, ey+8); ctx.stroke();
+      continue;
+    }
 
     if (ex !== null && ey !== null) {
       let arrowColor = '#22d3ee'; 
-
-if (ev.Event.toLowerCase() === "pass") {
-  arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
-} else if (ev.Event.toLowerCase() === "dribble") {
-  arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#c084fc" : "#ffb454";
-} else if (ev.Event.toLowerCase() === "shot") {
-  arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "goal") ? "#22de4c" : "#e53935";
-} else if (ev.Event.toLowerCase() === "cross") {
-    arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
-  }
-
-
-drawArrow(sx, sy, ex, ey, arrowColor);
-
+      if (ev.Event.toLowerCase() === "pass") arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
+      else if (ev.Event.toLowerCase() === "dribble") arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#c084fc" : "#ffb454";
+      else if (ev.Event.toLowerCase() === "shot") arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "goal") ? "#22de4c" : "#e53935";
+      else if (ev.Event.toLowerCase() === "cross") arrowColor = (ev.Outcome && ev.Outcome.toLowerCase() === "successful") ? "#22de4c" : "#e53935";
+      drawArrow(sx, sy, ex, ey, arrowColor);
     } else {
-  let dotColor = '#ef4444'; 
-
-  if (ev.Event.toLowerCase() === 'shot') {
-    dotColor = (ev.Outcome && ev.Outcome.toLowerCase() === 'goal') ? '#22de4c' : '#ef4444';
-  }
-
-  ctx.fillStyle = dotColor;
-  ctx.beginPath();
-  ctx.arc(sx, sy, 6, 0, Math.PI * 2);
-  ctx.fill();
-}
-
+      let dotColor = (ev.Event.toLowerCase() === 'shot' && ev.Outcome && ev.Outcome.toLowerCase() === 'goal') ? '#22de4c' : '#ef4444';
+      ctx.fillStyle = dotColor; ctx.beginPath(); ctx.arc(sx, sy, 6, 0, Math.PI * 2); ctx.fill();
+    }
   }
 
   if (tempStart) {
-    ctx.fillStyle = '#e5e7eb';
-    ctx.beginPath();
-    ctx.arc(tempStart.x, tempStart.y, 6, 0, Math.PI * 2);
-    ctx.fill();
+    // رسم نقطة البداية المؤقتة أثناء التحديد
+    let tsx = (tempStart.rawX / 120) * (pitch.width - 2 * PADDING) + PADDING;
+    let tsy = (tempStart.rawY / 80) * (pitch.height - 2 * PADDING) + PADDING;
+    ctx.fillStyle = '#e5e7eb'; ctx.beginPath(); ctx.arc(tsx, tsy, 6, 0, Math.PI * 2); ctx.fill();
   }
 }
 
   
-
- 
 
 redrawAll();
   window.addEventListener('resize', redrawAll);
@@ -908,48 +820,36 @@ const y = Math.max(PADDING, Math.min(pitch.height - PADDING, yRaw));
 
     const evType = currentEventType || (boot.eventTypes[0]||'Event');
 
+    // الإحداثيات اللي الماوس وقف عندها فعلاً
+    let clickX  = +(((x - PADDING) / (pitch.width - 2 * PADDING)) * 120).toFixed(1);
+    let clickY  = +(((y - PADDING) / (pitch.height - 2 * PADDING)) * 80).toFixed(1);
+
+    // المنطق الجديد: "نط" للإحداثي المعكوس فوراً لو الشوط التاني
+    let finalX = clickX;
+    let finalY = clickY;
+    if (parseInt(currentHalf) === 2) {
+      finalX = +(120 - clickX).toFixed(1);
+      finalY = +(80 - clickY).toFixed(1);
+    }
+
     const singleClickEvents = ['shot', 'tackle', 'interception', 'block'];
 if (singleClickEvents.includes(evType.toLowerCase())) {
- const X  = +(((x - PADDING) / (pitch.width - 2 * PADDING)) * 120).toFixed(1);
-const Y  = +(((y - PADDING) / (pitch.height - 2 * PADDING)) * 80).toFixed(1);
 
   const t = Math.max(0, vid.currentTime||0);
   const mins = Math.floor(t/60), secs=Math.floor(t%60);
-
   const whichTeam = teamSel.value;
   const teamName  = whichTeam==='T1' ? team1Name.value.trim()||'Team 1' : team2Name.value.trim()||'Team 2';
-
   let player = playerFree.value.trim();
   if(!player) player = playerSel.value || '';
-
   let outcome = '';
-if (evType.toLowerCase() === 'shot') {
-  outcome = shotOutcome ? (shotOutcome.value || '') : '';
-} else if (evType.toLowerCase() === 'pass') {
-  outcome = passOutcome ? (passOutcome.value || '') : '';
-} else if (evType.toLowerCase() === 'dribble') {
-  outcome = dribbleOutcome ? (dribbleOutcome.value || '') : '';
-} else if (evType.toLowerCase() === 'tackle') {
-  outcome = tackleOutcome ? (tackleOutcome.value || '') : '';
-}else if (evType.toLowerCase() === 'cross') {
-  outcome = crossOutcome ? (crossOutcome.value || '') : '';
-}
+  if (evType.toLowerCase() === 'shot') outcome = shotOutcome.value;
+  else if (evType.toLowerCase() === 'pass') outcome = passOutcome.value;
+  else if (evType.toLowerCase() === 'dribble') outcome = dribbleOutcome.value;
+  else if (evType.toLowerCase() === 'tackle') outcome = tackleOutcome.value;
+  else if (evType.toLowerCase() === 'cross') outcome = crossOutcome.value;
 
-
-  const row = {
-    Team: teamName,
-    Player: player,
-    Event: evType,
-    Outcome: outcome,
-    Mins: mins,
-    Secs: secs,
-    X,
-    Y,
-    X2: '',
-    Y2: '',
-    half: currentHalf
-  };
-
+  // الحفظ بالإحداثي المعكوس (finalX)
+  const row = { Team: teamName, Player: player, Event: evType, Outcome: outcome, Mins: mins, Secs: secs, X: finalX, Y: finalY, X2: '', Y2: '', half: currentHalf };
   events.push(row);
   appendRow(row);
   tempStart = null;
@@ -957,54 +857,32 @@ if (evType.toLowerCase() === 'shot') {
   return;
 }
 
-    if(!tempStart){ tempStart = {x,y}; redrawAll(); return; }
+    if(!tempStart){ 
+      // تخزين نقطة البداية بالإحداثي المعكوس والمكان الحقيقي للرسم المؤقت
+      tempStart = { x: finalX, y: finalY, rawX: clickX, rawY: clickY }; 
+      redrawAll(); 
+      return; 
+    }
 
-    const start = tempStart; tempStart = null;
-    const X  = +(start.x / pitch.width  * 120).toFixed(1);
-    const Y  = +(start.y / pitch.height * 80 ).toFixed(1);
-    const X2 = +(x       / pitch.width  * 120).toFixed(1);
-    const Y2 = +(y       / pitch.height * 80).toFixed(1);
+    const startX = tempStart.x;
+    const startY = tempStart.y;
+    tempStart = null;
 
     const t = Math.max(0, vid.currentTime||0);
     const mins = Math.floor(t/60), secs=Math.floor(t%60);
-
     const whichTeam = teamSel.value;
     const teamName  = whichTeam==='T1' ? team1Name.value.trim()||'Team 1' : team2Name.value.trim()||'Team 2';
-
     let player = playerFree.value.trim();
     if(!player) player = playerSel.value || '';
-
     let outcome = '';
-if ((evType || '').toLowerCase() === 'shot') {
-  outcome = shotOutcome ? (shotOutcome.value || '') : '';
-} else if ((evType || '').toLowerCase() === 'pass') {
-  outcome = passOutcome ? (passOutcome.value || '') : '';
-} else if ((evType || '').toLowerCase() === 'dribble') {
-  outcome = dribbleOutcome ? (dribbleOutcome.value || '') : '';
-}
-else if ((evType || '').toLowerCase() === 'cross') {
-  outcome = crossOutcome ? (crossOutcome.value || '') : '';
-}
+    if (evType.toLowerCase() === 'pass') outcome = passOutcome.value;
+    else if (evType.toLowerCase() === 'dribble') outcome = dribbleOutcome.value;
+    else if (evType.toLowerCase() === 'cross') outcome = crossOutcome.value;
 
-const row = {
-  Team: teamName,
-  Player: player,
-  Event: evType,
-  Outcome: outcome,
-  Mins: mins,
-  Secs: secs,
-  X,
-  Y,
-  X2,
-  Y2,
-  half: currentHalf  
-};
-
-
-events.push(row);
-appendRow(row);
-redrawAll();
-
+    const row = { Team: teamName, Player: player, Event: evType, Outcome: outcome, Mins: mins, Secs: secs, X: startX, Y: startY, X2: finalX, Y2: finalY, half: currentHalf };
+    events.push(row);
+    appendRow(row);
+    redrawAll();
   });
 });
 
@@ -1038,189 +916,68 @@ redrawAll();
     Object.assign(boot, JSON.parse(JSON.stringify(defaultState)));
     events = [];
     rebuildTable();
-
     team1Name.value = boot.team1Name;
     team2Name.value = boot.team2Name;
     t1Label.textContent = `${boot.team1Name} Roster`;
     t2Label.textContent = `${boot.team2Name} Roster`;
     t1RosterTA.value = boot.t1Roster;
     t2RosterTA.value = boot.t2Roster;
-
     populateTeamSelect();
     teamSel.value = 'T1';
     populatePlayerSelect();
-
     currentEventType = null;
     renderEvtBar();
     newEvt.value = '';
     playerFree.value = '';
-
-    try {
-      vid.pause();
-      if (vid.src && vid.src.startsWith('blob:')) URL.revokeObjectURL(vid.src);
-    } catch(e){}
-    vid.removeAttribute('src');
-    vid.load();
-    timeSlider.value = 0;
-    timeLabel.textContent = '0:00';
-
-    tempStart = null;
-    redrawAll();
+    try { vid.pause(); if (vid.src && vid.src.startsWith('blob:')) URL.revokeObjectURL(vid.src); } catch(e){}
+    vid.removeAttribute('src'); vid.load();
+    timeSlider.value = 0; timeLabel.textContent = '0:00';
+    tempStart = null; redrawAll();
   };
 
   // ======= Export CSV =======
   btnExport.onclick = async () => {
   if(events.length===0){ alert('No events'); return; }
-
   const matchName = prompt("write match name:", "Match 1");
   if(!matchName) return;
-
-  const payload = {
-    matchName: matchName,  
-    team1: team1Name.value.trim() || 'Team 1',
-    team2: team2Name.value.trim() || 'Team 2',
-    events: events
-  };
-
+  const payload = { matchName: matchName, team1: team1Name.value.trim() || 'Team 1', team2: team2Name.value.trim() || 'Team 2', events: events };
   try {
     const BACKEND = 'https://abdelati88.shop'; 
-    const res = await fetch(BACKEND + '/api/saveMatch', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
+    const res = await fetch(BACKEND + '/api/saveMatch', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
     if(!res.ok) throw new Error('Save failed: ' + res.status);
-    const data = await res.json();
-    alert('Match saved: ' + matchName);
-
+    alert('Match saved with Normalized/Unified coordinates: ' + matchName);
     renderSavedMatches();
-  } catch (err) {
-    console.error(err);
-    alert('Failed to save match: ' + err.message);
-  }
+  } catch (err) { alert('Failed to save match: ' + err.message); }
 };
 
-
-
-// ====== saved matches UI & load from server ======
 async function renderSavedMatches() {
   const BACKEND = 'https://abdelati88.shop';
   const res = await fetch(BACKEND + '/api/matches');
-  if (!res.ok) {
-    console.error("Failed to fetch matches", res.status);
-    return;
-  }
+  if (!res.ok) return;
   const matches = await res.json();
-
   const tbody = document.getElementById("savedMatchesBody");
   tbody.innerHTML = "";
-
  matches.forEach((m, i) => {
   const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td>${i+1}</td>
-    <td>${m.match_name || "Unnamed"}</td>
-    <td>${m.team1} vs ${m.team2}</td>
-    <td>${m.events_count}</td>
-    <td>${new Date(m.date_created).toLocaleString()}</td>
-    <td>
-      <a href="${BACKEND}/api/export/${m.match_id}" target="_blank">Download CSV</a> |
-      <a href="#" class="loadMatch" data-id="${m.match_id}">Load</a>
-    </td>
-  `;
+  tr.innerHTML = `<td>${i+1}</td><td>${m.match_name || "Unnamed"}</td><td>${m.team1} vs ${m.team2}</td><td>${m.events_count}</td><td>${new Date(m.date_created).toLocaleString()}</td><td><a href="${BACKEND}/api/export/${m.match_id}" target="_blank">Download CSV</a> | <a href="#" class="loadMatch" data-id="${m.match_id}">Load</a></td>`;
   tbody.appendChild(tr);
 });
-
-
-
-
-  // attach click handlers
-  document.querySelectorAll('.loadMatch').forEach(a=>{
-    a.addEventListener('click', async (ev)=>{
-      ev.preventDefault();
-      const id = a.dataset.id;
-      await loadMatch(id);
-    });
-  });
+  document.querySelectorAll('.loadMatch').forEach(a=>{ a.addEventListener('click', async (ev)=>{ ev.preventDefault(); await loadMatch(a.dataset.id); }); });
 }
-
-
-
 
 async function loadMatch(matchId){
   try {
-    const BACKEND = 'https://https://abdelati88.shop'; // 
+    const BACKEND = 'https://abdelati88.shop'; 
     const res = await fetch(BACKEND + '/api/events/' + matchId);
     if(!res.ok) throw new Error('Load events failed');
     const eventsData = await res.json();
-    // convert to the same shape your front-end uses
-    events = eventsData.map(e => ({
-      Team: e.team,
-      Player: e.player,
-      Event: e.event,
-      Outcome: e.outcome,
-      Mins: e.mins,
-      Secs: e.secs,
-      X: e.x,
-      Y: e.y,
-      X2: e.x2 ?? '',
-      Y2: e.y2 ?? ''
-    }));
-    rebuildTable();
-    redrawAll();
-    alert('Loaded match #' + matchId);
-  } catch(err){
-    console.error(err);
-    alert('Failed to load match: ' + err.message);
-  }
+    events = eventsData.map(e => ({ Team: e.team, Player: e.player, Event: e.event, Outcome: e.outcome, Mins: e.mins, Secs: e.secs, X: e.x, Y: e.y, X2: e.x2 ?? '', Y2: e.y2 ?? '', half: e.half || 1 }));
+    rebuildTable(); redrawAll(); alert('Loaded match #' + matchId);
+  } catch(err){ alert('Failed to load match: ' + err.message); }
 }
 
-// call once page loads
-window.addEventListener('load', () => {
-  // existing onload code runs already 
-  renderSavedMatches();
-});
-
-
-
-
-async function loadMatch(matchId) {
-  const BACKEND = "https://abdelati88.shop";
-  const res = await fetch(BACKEND + "/api/events/" + matchId);
-  if (!res.ok) {
-    alert("Failed to load match");
-    return;
-  }
-  const eventsData = await res.json();
-
-  events = eventsData.map(e => ({
-    Team: e.team,
-    Player: e.player,
-    Event: e.event,
-    Outcome: e.outcome,
-    Mins: e.mins,
-    Secs: e.secs,
-    X: e.x,
-    Y: e.y,
-    X2: e.x2 ?? "",
-    Y2: e.y2 ?? ""
-  }));
-
-  rebuildTable();   
-  redrawAll();     
-  alert("Loaded match #" + matchId);
-}
-
-
+window.addEventListener('load', () => { renderSavedMatches(); });
 </script>
-
-
-<!-- Bottom Ad Space -->
-<div class="ad-container">
-  <div class="ad-placeholder ad-bottom">
-    Google AdSense Ad 
-  </div>
-</div>
 
 <footer style="margin-top:18px; padding:8px 0; text-align:center; font-size:14px; color:#aaa; border-top:1px solid #333; background:#161e2a;">
   <div style="margin-bottom:8px; display:flex; justify-content:center; gap:10px; align-items:center;">
@@ -1228,45 +985,11 @@ async function loadMatch(matchId) {
     <a href="https://www.linkedin.com/in/abdelati88" target="_blank" style="display:inline-flex;align-items:center;">
       <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/linkedin.svg" alt="LinkedIn" style="width:19px;height:19px;filter:invert(43%) sepia(67%) saturate(3488%) hue-rotate(226deg) brightness(95%) contrast(93%);"/>
     </a>
-    <a href="https://github.com/abdelati88" target="_blank" style="display:inline-flex;align-items:center;">
-      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg" alt="GitHub" style="width:19px;height:19px;filter:invert(37%) sepia(10%) saturate(0%) hue-rotate(202deg) brightness(60%) contrast(90%);"/>
-    </a>
-    <a href="https://www.youtube.com/@abdelati88" target="_blank" style="display:inline-flex;align-items:center;">
-      <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" alt="YouTube" style="width:19px;height:19px;filter:invert(25%) sepia(87%) saturate(7472%) hue-rotate(353deg) brightness(96%) contrast(117%);"/>
-    </a>
   </div>
-
-  <div style="display:grid; grid-template-columns:2fr 1.3fr 2fr; max-width:850px; margin:0 auto; text-align:center; gap:8px;">
-    <div style="padding:4px 14px;">
-      <h3 style="margin:0 0 5px; color:#fff; font-size:15.5px;">About</h3>
-      <p style="margin:0; color:#ccc; font-size:13.5px; line-height:1.55;">
-        This tool lets you upload match videos and tag important in-game events. 
-        Easy, fast, and useful for coaches and analysts.
-      </p>
-    </div>
-    <div style="padding:4px 8px;">
-      <h3 style="margin:0 0 5px; color:#fff; font-size:15.5px;">Contact</h3>
-      <p style="margin:0; font-size:13.5px; color:#ccc;">
-        <a href="mailto:edenmohamed88@gmail.com"
-           style="color:#ccc; font-weight:bold; text-decoration:underline;">
-          edenmohamed88@gmail.com
-        </a>
-      </p>
-    </div>
-    <div style="padding:4px 14px;">
-      <h3 style="margin:0 0 5px; color:#fff; font-size:15.5px;">Privacy Policy</h3>
-      <p style="margin:0; color:#e8eff2; font-size:13.5px; line-height:1.55;">
-        No personal data is collected or shared with third parties. 
-        We ensure your privacy is fully respected.
-      </p>
-    </div>
-  </div>
-
   <div style="margin-top:10px; font-size:13px; color:#777; border-top:1px solid #2a2a2a; padding-top:6px;">
     © 2025 <span style="color:#ccc;">abdelati88.shop</span> — All Rights Reserved.
   </div>
 </footer>
-
 
 </body>
 </html>
